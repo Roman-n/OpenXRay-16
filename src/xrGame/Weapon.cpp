@@ -177,7 +177,15 @@ void CWeapon::UpdateAltScope()
 shared_str CWeapon::GetNameWithAttachment()
 {
     string64 str;
-    xr_sprintf(str, "%s_%s", m_section_id.c_str(), GetScopeName().c_str());
+    if (pSettings->line_exist(m_section_id.c_str(), "parent_section"))
+    {
+        shared_str parent = pSettings->r_string(m_section_id.c_str(), "parent_section");
+        xr_sprintf(str, "%s_%s", parent.c_str(), GetScopeName().c_str());
+    }
+    else
+    {
+        xr_sprintf(str, "%s_%s", m_section_id.c_str(), GetScopeName().c_str());
+    }
     return (shared_str)str;
 }
 
@@ -530,7 +538,11 @@ void CWeapon::Load(LPCSTR section)
     m_zoom_params.m_bZoomEnabled = !!pSettings->r_bool(section, "zoom_enabled");
     m_zoom_params.m_fZoomRotateTime = READ_IF_EXISTS(pSettings, r_float, section, "zoom_rotate_time", ROTATION_TIME);
 
-    UseAltScope = pSettings->line_exist(section, "scopes");
+    m_zoom_params.m_bUseDynamicZoom = FALSE;
+    m_zoom_params.m_sUseZoomPostprocess = 0;
+    m_zoom_params.m_sUseBinocularVision = 0;
+
+    UseAltScope = (bool)pSettings->line_exist(section, "scopes");
 
     if (UseAltScope)
     {
@@ -544,7 +556,7 @@ void CWeapon::Load(LPCSTR section)
 
                 if (!xr_strcmp(scope_section, "none"))
                 {
-                    UseAltScope = 0;
+                    UseAltScope = false;
                 }
                 else
                 {
@@ -663,10 +675,6 @@ void CWeapon::Load(LPCSTR section)
         strconcat(sizeof(temp), temp, "hit_probability_", get_token_name(difficulty_type_token, i));
         m_hit_probability[i] = READ_IF_EXISTS(pSettings, r_float, section, temp, 1.f);
     }
-
-    m_zoom_params.m_bUseDynamicZoom = READ_IF_EXISTS(pSettings, r_bool, section, "scope_dynamic_zoom", false);
-    m_zoom_params.m_sUseZoomPostprocess = nullptr;
-    m_zoom_params.m_sUseBinocularVision = nullptr;
 
     // Added by Axel, to enable optional condition use on any item
     m_flags.set(FUsingCondition, READ_IF_EXISTS(pSettings, r_bool, section, "use_condition", true));
@@ -1440,17 +1448,22 @@ void CWeapon::UpdateHUDAddonsVisibility()
 
     //. return;
 
-    if (ScopeAttachable())
-    {
-        HudItemData()->set_bone_visible(wpn_scope, IsScopeAttached());
-    }
+    u16 bone_id = HudItemData()->m_model->LL_BoneID(wpn_scope);
 
-    if (m_eScopeStatus == ALife::eAddonDisabled)
+    if (bone_id != BI_NONE)
     {
-        HudItemData()->set_bone_visible(wpn_scope, FALSE, TRUE);
+        if (ScopeAttachable())
+        {
+            HudItemData()->set_bone_visible(wpn_scope, IsScopeAttached());
+        }
+
+        if (m_eScopeStatus == ALife::eAddonDisabled)
+        {
+            HudItemData()->set_bone_visible(wpn_scope, FALSE, TRUE);
+        }
+        else if (m_eScopeStatus == ALife::eAddonPermanent)
+            HudItemData()->set_bone_visible(wpn_scope, TRUE, TRUE);
     }
-    else if (m_eScopeStatus == ALife::eAddonPermanent)
-        HudItemData()->set_bone_visible(wpn_scope, TRUE, TRUE);
 
     if (SilencerAttachable())
     {
@@ -1490,12 +1503,12 @@ void CWeapon::UpdateAddonsVisibility()
     {
         if (IsScopeAttached())
         {
-            if (!pWeaponVisual->LL_GetBoneVisible(bone_id))
+            if (!pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id!=BI_NONE)
                 pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
         }
         else
         {
-            if (pWeaponVisual->LL_GetBoneVisible(bone_id))
+            if (pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
                 pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
         }
     }

@@ -106,6 +106,8 @@ int g_keypress_on_start = 1;
 
 ENGINE_API extern float g_console_sensitive;
 
+bool bCheatEnable = READ_IF_EXISTS(pSettingsOpenXRay, r_bool, "debug", "cheats_mode", false);
+
 //Alundaio
 extern BOOL g_ai_die_in_anomaly;
 int g_inv_highlight_equipped = 0;
@@ -2098,16 +2100,20 @@ void CCC_RegisterCommands()
     CMD4(CCC_FloatBlock, "ph_tri_query_ex_aabb_rate", &ph_console::ph_tri_query_ex_aabb_rate, 1.01f, 3.f);
 #endif // DEBUG
 
+	if (bCheatEnable)
+	{
+        CMD3(CCC_Mask, "g_god", &psActorFlags, AF_GODMODE);
+        CMD3(CCC_Mask, "g_unlimitedammo", &psActorFlags, AF_UNLIMITEDAMMO);
+        CMD1(CCC_SetWeather, "set_weather");
+	}
+
 #ifndef MASTER_GOLD
     CMD1(CCC_JumpToLevel, "jump_to_level");
-    CMD3(CCC_Mask, "g_god", &psActorFlags, AF_GODMODE);
     CMD1(CCC_ToggleNoClip, "g_no_clip");
-    CMD3(CCC_Mask, "g_unlimitedammo", &psActorFlags, AF_UNLIMITEDAMMO);
     CMD1(CCC_Spawn, "g_spawn");
     CMD1(CCC_Script, "run_script");
     CMD1(CCC_ScriptCommand, "run_string");
     CMD1(CCC_TimeFactor, "time_factor");
-    CMD1(CCC_SetWeather, "set_weather");
 #endif // MASTER_GOLD
 
     CMD3(CCC_Mask, "g_autopickup", &psActorFlags, AF_AUTOPICKUP);

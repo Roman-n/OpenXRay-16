@@ -39,9 +39,7 @@ public:
     void HideShownDialogs() override;
     void ReinitDialogs() override;
 
-#ifdef DEBUG
     virtual void Render();
-#endif
     CUITalkWnd* TalkMenu;
     CChangeLevelWnd* UIChangeLevelWnd;
 

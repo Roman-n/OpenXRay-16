@@ -1524,6 +1524,53 @@ struct CCC_TimeFactorSingle : public CCC_Float
     }
 };
 
+#include "attachable_item.h"
+#include "attachment_owner.h"
+#include "InventoryOwner.h"
+#include "Inventory.h"
+class CCC_TuneAttachableItem : public IConsole_Command
+{
+public:
+    CCC_TuneAttachableItem(LPCSTR N) : IConsole_Command(N) {};
+    virtual void Execute(LPCSTR args)
+    {
+        if (CAttachableItem::m_dbgItem)
+        {
+            CAttachableItem::m_dbgItem = NULL;
+            Msg("CCC_TuneAttachableItem switched to off");
+            return;
+        };
+
+        IGameObject* obj = Level().CurrentViewEntity();
+        VERIFY(obj);
+        shared_str ssss = args;
+
+        CAttachmentOwner* owner = smart_cast<CAttachmentOwner*>(obj);
+        CAttachableItem* itm = owner->attachedItem(ssss);
+        if (itm)
+        {
+            CAttachableItem::m_dbgItem = itm;
+        }
+        else
+        {
+            CInventoryOwner* iowner = smart_cast<CInventoryOwner*>(obj);
+            PIItem active_item = iowner->m_inventory->ActiveItem();
+            if (active_item && active_item->object().cNameSect() == ssss)
+                CAttachableItem::m_dbgItem = active_item->cast_attachable_item();
+        }
+
+        if (CAttachableItem::m_dbgItem)
+            Msg("CCC_TuneAttachableItem switched to ON for [%s]", args);
+        else
+            Msg("CCC_TuneAttachableItem cannot find attached item [%s]", args);
+    }
+
+    virtual void Info(TInfo& I)
+    {
+        xr_sprintf(I, "allows to change bind rotation and position offsets for attached item, <section_name> given as arguments");
+    }
+};
+
 #ifdef DEBUG
 class CCC_RadioGroupMask2;
 class CCC_RadioMask : public CCC_Mask
@@ -1595,54 +1642,6 @@ struct CCC_DbgBullets : public CCC_Integer
         g_hit[1].clear();
         g_hit[2].clear();
         CCC_Integer::Execute(args);
-    }
-};
-
-#include "attachable_item.h"
-#include "attachment_owner.h"
-#include "InventoryOwner.h"
-#include "Inventory.h"
-class CCC_TuneAttachableItem : public IConsole_Command
-{
-public:
-    CCC_TuneAttachableItem(LPCSTR N) : IConsole_Command(N){};
-    virtual void Execute(LPCSTR args)
-    {
-        if (CAttachableItem::m_dbgItem)
-        {
-            CAttachableItem::m_dbgItem = NULL;
-            Msg("CCC_TuneAttachableItem switched to off");
-            return;
-        };
-
-        IGameObject* obj = Level().CurrentViewEntity();
-        VERIFY(obj);
-        shared_str ssss = args;
-
-        CAttachmentOwner* owner = smart_cast<CAttachmentOwner*>(obj);
-        CAttachableItem* itm = owner->attachedItem(ssss);
-        if (itm)
-        {
-            CAttachableItem::m_dbgItem = itm;
-        }
-        else
-        {
-            CInventoryOwner* iowner = smart_cast<CInventoryOwner*>(obj);
-            PIItem active_item = iowner->m_inventory->ActiveItem();
-            if (active_item && active_item->object().cNameSect() == ssss)
-                CAttachableItem::m_dbgItem = active_item->cast_attachable_item();
-        }
-
-        if (CAttachableItem::m_dbgItem)
-            Msg("CCC_TuneAttachableItem switched to ON for [%s]", args);
-        else
-            Msg("CCC_TuneAttachableItem cannot find attached item [%s]", args);
-    }
-
-    virtual void Info(TInfo& I)
-    {
-        xr_sprintf(I,
-            "allows to change bind rotation and position offsets for attached item, <section_name> given as arguments");
     }
 };
 
@@ -2078,7 +2077,6 @@ void CCC_RegisterCommands()
 
     CMD1(CCC_ShowMonsterInfo, "ai_monster_info");
     CMD1(CCC_DebugFonts, "debug_fonts");
-    CMD1(CCC_TuneAttachableItem, "dbg_adjust_attachable_item");
 
     CMD1(CCC_ShowAnimationStats, "ai_show_animation_stats");
 #endif // DEBUG
@@ -2105,6 +2103,7 @@ void CCC_RegisterCommands()
         CMD3(CCC_Mask, "g_god", &psActorFlags, AF_GODMODE);
         CMD3(CCC_Mask, "g_unlimitedammo", &psActorFlags, AF_UNLIMITEDAMMO);
         CMD1(CCC_SetWeather, "set_weather");
+        CMD1(CCC_TuneAttachableItem, "dbg_adjust_attachable_item");
 	}
 
 #ifndef MASTER_GOLD

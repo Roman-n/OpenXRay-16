@@ -1,3 +1,7 @@
+/*************************************/ //--#SM+#--
+/***** Хелпер для настройки худа *****/ // -#Mortan
+/*************************************/
+
 #include "StdAfx.h"
 #include "player_hud.h"
 #include "Level.h"
@@ -16,8 +20,8 @@ u32 hud_adj_mode = 0;
 u32 hud_adj_item_idx = 0;
 // "press SHIFT+NUM 0-return 1-hud_pos 2-hud_rot 3-itm_pos 4-itm_rot 5-fire_point 6-fire_2_point 7-shell_point";
 
-float _delta_pos = 0.0005f;
-float _delta_rot = 0.05f;
+float _delta_pos = READ_IF_EXISTS(pSettingsOpenXRay, r_float, "hud_adj", "_delta_pos", 0.0005f);
+float _delta_rot = READ_IF_EXISTS(pSettingsOpenXRay, r_float, "hud_adj", "_delta_rot", 0.05f);
 
 bool is_attachable_item_tuning_mode()
 {
@@ -106,7 +110,6 @@ void calc_cam_diff_rot(Fmatrix item_transform, Fvector diff, Fvector& res)
 
 void attachable_hud_item::tune(Ivector values)
 {
-#ifndef MASTER_GOLD
     if (!is_attachable_item_tuning_mode())
         return;
 
@@ -150,10 +153,8 @@ void attachable_hud_item::tune(Ivector values)
         if ((values.x) || (values.y) || (values.z))
         {
             Msg("[%s]", m_sect_name.c_str());
-            Msg("item_position				= %f,%f,%f", m_measures.m_item_attach[0].x, m_measures.m_item_attach[0].y,
-                m_measures.m_item_attach[0].z);
-            Msg("item_orientation			= %f,%f,%f", m_measures.m_item_attach[1].x, m_measures.m_item_attach[1].y,
-                m_measures.m_item_attach[1].z);
+            Msg("item_position = %f,%f,%f", m_measures.m_item_attach[0].x, m_measures.m_item_attach[0].y, m_measures.m_item_attach[0].z);
+            Msg("item_orientation = %f,%f,%f", m_measures.m_item_attach[1].x, m_measures.m_item_attach[1].y, m_measures.m_item_attach[1].z);
             Log("-----------");
         }
     }
@@ -182,21 +183,16 @@ void attachable_hud_item::tune(Ivector values)
         if ((values.x) || (values.y) || (values.z))
         {
             Msg("[%s]", m_sect_name.c_str());
-            Msg("fire_point				= %f,%f,%f", m_measures.m_fire_point_offset.x, m_measures.m_fire_point_offset.y,
-                m_measures.m_fire_point_offset.z);
-            Msg("fire_point2			= %f,%f,%f", m_measures.m_fire_point2_offset.x,
-                m_measures.m_fire_point2_offset.y, m_measures.m_fire_point2_offset.z);
-            Msg("shell_point			= %f,%f,%f", m_measures.m_shell_point_offset.x,
-                m_measures.m_shell_point_offset.y, m_measures.m_shell_point_offset.z);
+            Msg("fire_point = %f,%f,%f", m_measures.m_fire_point_offset.x, m_measures.m_fire_point_offset.y, m_measures.m_fire_point_offset.z);
+            Msg("fire_point2 = %f,%f,%f", m_measures.m_fire_point2_offset.x, m_measures.m_fire_point2_offset.y, m_measures.m_fire_point2_offset.z);
+            Msg("shell_point = %f,%f,%f", m_measures.m_shell_point_offset.x, m_measures.m_shell_point_offset.y, m_measures.m_shell_point_offset.z);
             Log("-----------");
         }
     }
-#endif // #ifndef MASTER_GOLD
 }
 
 void attachable_hud_item::debug_draw_firedeps()
 {
-#ifdef DEBUG
     bool bForce = (hud_adj_mode == 3 || hud_adj_mode == 4);
 
     if (hud_adj_mode == 5 || hud_adj_mode == 6 || hud_adj_mode == 7 || bForce)
@@ -215,12 +211,10 @@ void attachable_hud_item::debug_draw_firedeps()
         if (hud_adj_mode == 7)
             render.draw_aabb(fd.vLastSP, 0.005f, 0.005f, 0.005f, color_xrgb(0, 255, 0));
     }
-#endif // DEBUG
 }
 
 void player_hud::tune(Ivector _values)
 {
-#ifndef MASTER_GOLD
     Ivector values;
     tune_remap(_values, values);
 
@@ -270,22 +264,22 @@ void player_hud::tune(Ivector _values)
             if (idx == 0)
             {
                 Msg("[%s]", m_attached_items[hud_adj_item_idx]->m_sect_name.c_str());
-                Msg("hands_position%s				= %f,%f,%f", (is_16x9) ? "_16x9" : "", pos_.x, pos_.y, pos_.z);
-                Msg("hands_orientation%s			= %f,%f,%f", (is_16x9) ? "_16x9" : "", rot_.x, rot_.y, rot_.z);
+                Msg("hands_position%s = %f,%f,%f", (is_16x9) ? "_16x9" : "", pos_.x, pos_.y, pos_.z);
+                Msg("hands_orientation%s = %f,%f,%f", (is_16x9) ? "_16x9" : "", rot_.x, rot_.y, rot_.z);
                 Log("-----------");
             }
             else if (idx == 1)
             {
                 Msg("[%s]", m_attached_items[hud_adj_item_idx]->m_sect_name.c_str());
-                Msg("aim_hud_offset_pos%s				= %f,%f,%f", (is_16x9) ? "_16x9" : "", pos_.x, pos_.y, pos_.z);
-                Msg("aim_hud_offset_rot%s				= %f,%f,%f", (is_16x9) ? "_16x9" : "", rot_.x, rot_.y, rot_.z);
+                Msg("aim_hud_offset_pos%s = %f,%f,%f", (is_16x9) ? "_16x9" : "", pos_.x, pos_.y, pos_.z);
+                Msg("aim_hud_offset_rot%s = %f,%f,%f", (is_16x9) ? "_16x9" : "", rot_.x, rot_.y, rot_.z);
                 Log("-----------");
             }
             else if (idx == 2)
             {
                 Msg("[%s]", m_attached_items[hud_adj_item_idx]->m_sect_name.c_str());
-                Msg("gl_hud_offset_pos%s				= %f,%f,%f", (is_16x9) ? "_16x9" : "", pos_.x, pos_.y, pos_.z);
-                Msg("gl_hud_offset_rot%s				= %f,%f,%f", (is_16x9) ? "_16x9" : "", rot_.x, rot_.y, rot_.z);
+                Msg("gl_hud_offset_pos%s = %f,%f,%f", (is_16x9) ? "_16x9" : "", pos_.x, pos_.y, pos_.z);
+                Msg("gl_hud_offset_rot%s = %f,%f,%f", (is_16x9) ? "_16x9" : "", rot_.x, rot_.y, rot_.z);
                 Log("-----------");
             }
         }
@@ -305,7 +299,6 @@ void player_hud::tune(Ivector _values)
             return;
         hi->tune(values);
     }
-#endif // #ifndef MASTER_GOLD
 }
 
 void hud_draw_adjust_mode()

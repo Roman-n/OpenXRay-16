@@ -424,6 +424,10 @@ void CActor::Load(LPCSTR section)
                     st_Effect, SOUND_TYPE_MONSTER_INJURING);
             }
         }
+        if (this == Level().CurrentEntity()) //--#SM+#-- Сбрасываем режим рендеринга в дефолтный [reset some render flags]
+        {
+            g_pGamePersistent->m_pGShaderConstants->m_blender_mode.set(0.f, 0.f, 0.f, 0.f);
+        }
     }
     if (psActorFlags.test(AF_PSP))
         cam_Set(eacLookAt);
@@ -1101,7 +1105,10 @@ void CActor::UpdateCL()
 
             fire_disp_full = m_fdisp_controller.GetCurrentDispertion();
 
-            HUD().SetCrosshairDisp(fire_disp_full, 0.02f);
+            // --#SM+#-- +SecondVP+ Чтобы перекрестие не скакало из за смены FOV (Sin!) [fix for crosshair shaking while SecondVP]
+            if (!Device.m_SecondViewport.IsSVPFrame())
+                HUD().SetCrosshairDisp(fire_disp_full, 0.02f);
+
             HUD().ShowCrosshair(pWeapon->use_crosshair());
 #ifdef DEBUG
             HUD().SetFirstBulletCrosshairDisp(pWeapon->GetFirstBulletDisp());
@@ -1116,6 +1123,19 @@ void CActor::UpdateCL()
             psHUD_Flags.set(HUD_CROSSHAIR_RT2, B);
 
             psHUD_Flags.set(HUD_DRAW_RT, pWeapon->show_indicators());
+
+            // Обновляем двойной рендер от оружия [Update SecondVP with weapon data]
+            pWeapon->UpdateSecondVP(); // --#SM+#-- +SecondVP+
+
+            bool bUseMark = !!pWeapon->IsZoomed();
+            bool bInZoom = !!pWeapon->bInZoomRightNow();
+            bool bNVEnbl = !!pWeapon->bNVsecondVPstatus;
+
+            // Обновляем информацию об оружии в шейдерах
+            g_pGamePersistent->m_pGShaderConstants->hud_params.x = bInZoom;  //--#SM+#--
+            g_pGamePersistent->m_pGShaderConstants->hud_params.y = pWeapon->GetSecondVPFov(); //--#SM+#--
+            g_pGamePersistent->m_pGShaderConstants->hud_params.z = bUseMark; //--#SM+#--
+            g_pGamePersistent->m_pGShaderConstants->m_blender_mode.x = bNVEnbl;  //--#SM+#--
         }
     }
     else
@@ -1124,6 +1144,14 @@ void CActor::UpdateCL()
         {
             HUD().SetCrosshairDisp(0.f);
             HUD().ShowCrosshair(false);
+
+            // Очищаем информацию об оружии в шейдерах
+            g_pGamePersistent->m_pGShaderConstants->hud_params.set(0.f, 0.f, 0.f, 0.f); // --#SM+#--
+            g_pGamePersistent->m_pGShaderConstants->m_blender_mode.set(0.f, 0.f, 0.f, 0.f); //--#SM+#--
+
+            // Отключаем второй вьюпорт [Turn off SecondVP]
+            // CWeapon::UpdateSecondVP();
+            Device.m_SecondViewport.SetSVPActive(false); // --#SM+#-- +SecondVP+
         }
     }
 

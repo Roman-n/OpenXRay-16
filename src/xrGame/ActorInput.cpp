@@ -1,4 +1,5 @@
 #include "StdAfx.h"
+#include <dinput.h>
 #include "Actor.h"
 #include "Torch.h"
 #include "trade.h"
@@ -50,6 +51,13 @@ void CActor::IR_OnKeyboardPress(int cmd)
 
     if (load_screen_renderer.IsActive())
         return;
+
+    if (pInput->iGetAsyncKeyState(DIK_ADD))
+        inventory().Action((u16)kWPN_ZOOM_INC, CMD_START);
+    else if (pInput->iGetAsyncKeyState(DIK_SUBTRACT))
+        inventory().Action((u16)kWPN_ZOOM_DEC, CMD_START);
+    else if (pInput->iGetAsyncKeyState(DIK_HOME))
+        inventory().Action((u16)kWPN_NV_CHANGE, CMD_START);
 
     bool quickSlot = false;
     switch (cmd)

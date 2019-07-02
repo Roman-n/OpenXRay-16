@@ -469,9 +469,12 @@ void CHW::EndScene() { }
 
 void CHW::Present()
 {
-    const bool bUseVSync = psDeviceMode.WindowStyle == rsFullscreen &&
-        psDeviceFlags.test(rsVSync); // xxx: weird tearing glitches when VSync turned on for windowed mode in DX11
-    m_pSwapChain->Present(bUseVSync ? 1 : 0, 0);
+    if (!Device.m_SecondViewport.IsSVPFrame() && !Device.m_SecondViewport.isCamReady) //--#SM+#-- +SecondVP+ Не выводим кадр из второго рендера на экран
+    {
+        const bool bUseVSync = psDeviceMode.WindowStyle == rsFullscreen &&
+            psDeviceFlags.test(rsVSync); // xxx: weird tearing glitches when VSync turned on for windowed mode in DX11
+        m_pSwapChain->Present(bUseVSync ? 1 : 0, 0);
+    }
 #ifdef HAS_DX11_2
     if (m_pSwapChain2 && UsingFlipPresentationModel())
     {

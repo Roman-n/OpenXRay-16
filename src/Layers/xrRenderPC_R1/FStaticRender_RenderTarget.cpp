@@ -9,6 +9,7 @@ CRenderTarget::CRenderTarget()
     rt_color_map = nullptr;
     rt_temp_zb = nullptr;
     rt_Depth = nullptr;
+    rt_SecondVP = nullptr; //--#SM+# +SecondVP+
 
     param_blur = 0.f;
     param_gray = 0.f;
@@ -68,6 +69,8 @@ BOOL CRenderTarget::Create()
     }
     // RImplementation.o.color_mapping = RT_color_map->valid();
 
+    rt_SecondVP.create(rt_RT_SecondVP, rtWidth, rtHeight, HW.Caps.fTarget); //--#SM+#-- +SecondVP+
+
     if ((rtHeight != Device.dwHeight) || (rtWidth != Device.dwWidth))
     {
         rt_Depth.create(r1_RT_depth, rtWidth, rtHeight, HW.Caps.fDepth, 0, { CRT::CreateSurface });
@@ -118,6 +121,7 @@ CRenderTarget::~CRenderTarget()
     rt_distort.destroy();
     rt_color_map.destroy();
     rt_Generic.destroy();
+    rt_SecondVP.destroy(); //--#SM+#-- +SecondVP+
 }
 
 void CRenderTarget::calc_tc_noise(Fvector2& p0, Fvector2& p1)

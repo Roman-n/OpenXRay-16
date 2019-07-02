@@ -955,6 +955,11 @@ bool CWeaponMagazined::Attach(PIItem pIItem, bool b_send_event)
 
     if (result)
     {
+        if (pScope && UseAltScope)
+        {
+            bNVsecondVPstatus = !!pSettings->line_exist(pIItem->object().cNameSect(), "scope_nightvision");
+        }
+
         if (b_send_event && OnServer())
         {
             //уничтожить подсоединенную вещь из инвентаря
@@ -1057,36 +1062,9 @@ void CWeaponMagazined::InitAddons()
         READ_IF_EXISTS(pSettings, r_float, cNameSect(), "ironsight_zoom_factor", 50.0f);
     if (IsScopeAttached())
     {
-        shared_str scope_tex_name;
         if (m_eScopeStatus == ALife::eAddonAttachable)
         {
-            ScopeIsHasTexture = false;
-            if (pSettings->line_exist(GetScopeName(), "scope_texture"))
-            {
-                scope_tex_name = pSettings->r_string(GetScopeName(), "scope_texture");
-                if (xr_strcmp(scope_tex_name, "none") != 0)
-                    ScopeIsHasTexture = true;
-            }
-
-            m_zoom_params.m_fScopeZoomFactor = pSettings->r_float(GetScopeName(), "scope_zoom_factor");
-
-            if (ScopeIsHasTexture)
-            {
-                m_zoom_params.m_sUseZoomPostprocess = READ_IF_EXISTS(pSettings, r_string, GetScopeName(), "scope_nightvision", 0);
-                m_zoom_params.m_bUseDynamicZoom = READ_IF_EXISTS(pSettings, r_bool, GetScopeName(), "scope_dynamic_zoom", false);
-                m_zoom_params.m_sUseBinocularVision = READ_IF_EXISTS(pSettings, r_string, GetScopeName(), "scope_alive_detector", 0);
-            }
-            m_fRTZoomFactor = m_zoom_params.m_fScopeZoomFactor;
-            if (m_UIScope)
-            {
-                xr_delete(m_UIScope);
-            }
-
-            if (ScopeIsHasTexture)
-            {
-                m_UIScope = xr_new<CUIWindow>();
-                LoadScope(scope_tex_name);
-            }
+            LoadCurrentScopeParams(GetScopeName().c_str());
         }
     }
     else

@@ -49,11 +49,24 @@ public:
     virtual void UpdateCL();
     virtual void shedule_Update(u32 dt);
 
-	/*------------------STCoP Weapon Pack SECTION-----------------------*/
+    /*------------------STCoP Weapon Pack SECTION-----------------------*/
     bool UseAltScope;
     void UpdateAltScope();
     bool ScopeIsHasTexture;
     shared_str GetNameWithAttachment();
+
+    // SWM3.0 hud collision
+    void LoadModParams(LPCSTR section);
+
+    float m_hud_fov_add_mod;
+    float m_nearwall_dist_max;
+    float m_nearwall_dist_min;
+    float m_nearwall_last_hud_fov;
+    float m_nearwall_target_hud_fov;
+    float m_nearwall_speed_mod;
+
+    float GetHudFov();
+    // End
 
     void renderable_Render(IRenderable* root) override;
     void render_hud_mode() override;

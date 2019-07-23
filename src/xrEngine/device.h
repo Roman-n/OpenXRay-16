@@ -19,7 +19,7 @@
 #include "xrCore/ModuleLookup.hpp"
 
 #define VIEWPORT_NEAR 0.2f
-#define VIEWPORT_NEAR_3D 0.001f
+#define VIEWPORT_NEAR_3D 0.01f
 
 #define DEVICE_RESET_PRECACHE_FRAME_COUNT 10
 

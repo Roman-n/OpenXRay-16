@@ -34,15 +34,16 @@ public:
 
     /*------------------STCoP Weapon Pack SECTION-----------------------*/
     // аддоны и управление аддонами
-    bool UseAltScope;
-    bool ScopeIsHasTexture;
+    bool bUseAltScope;
+    bool bScopeIsHasTexture;
     bool bNVsecondVPavaible;
     bool bNVsecondVPstatus;
 
     IC bool bInZoomRightNow() const { return m_zoom_params.m_fZoomRotationFactor > 0.05; }
-    IC bool IsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
-    bool LoadAltScopesParams(LPCSTR section);
-    bool ChangeNVSecondVPStatus();
+    IC bool bIsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
+    bool bLoadAltScopesParams(LPCSTR section);
+    virtual bool bMarkCanShow() { return IsZoomed(); }
+    bool bChangeNVSecondVPStatus();
 
     virtual void UpdateSecondVP(bool bInGrenade = false);
     void LoadModParams(LPCSTR section);

@@ -109,6 +109,7 @@ ENGINE_API extern float g_console_sensitive;
 
 bool bCheatEnable = READ_IF_EXISTS(pSettingsOpenXRay, r_bool, "debug", "cheats_mode", false);
 bool isCustomWeapon = READ_IF_EXISTS(pSettingsOpenXRay, r_bool, "debug", "custom_weapon", false);
+bool SWM_3D_SCOPES = !!READ_IF_EXISTS(pSettingsOpenXRay, r_bool, "gameplay", "SWM_3D_scopes", false);
 
 //Alundaio
 extern BOOL g_ai_die_in_anomaly;
@@ -2146,7 +2147,11 @@ void CCC_RegisterCommands()
         CMD4(CCC_U32, "hud_adjust_mode", &hud_adj_mode, 0, 5); /// adjust mode support
 
     }
-
+    if (SWM_3D_SCOPES)
+    {
+        CMD3(CCC_Mask, "g_3d_scopes", &psActorFlags, AF_3DSCOPE);
+        CMD3(CCC_Mask, "g_pnv_in_scope", &psActorFlags, AF_PNV_W_SCOPE_DIS);
+    }
 #ifndef MASTER_GOLD
     CMD1(CCC_JumpToLevel, "jump_to_level");
     CMD1(CCC_ToggleNoClip, "g_no_clip");

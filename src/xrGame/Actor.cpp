@@ -196,7 +196,7 @@ CActor::CActor() : CEntityAlive(), current_ik_cam_shift(0)
     m_anims = xr_new<SActorMotions>();
     //Alundaio: Needed for car
     m_vehicle_anims = xr_new<SActorVehicleAnims>();
-	//-Alundaio
+    //-Alundaio
     m_entity_condition = NULL;
     m_iLastHitterID = u16(-1);
     m_iLastHittingWeaponID = u16(-1);
@@ -242,9 +242,9 @@ CActor::~CActor()
     xr_delete(m_pPhysics_support);
 
     xr_delete(m_anims);
-	//Alundaio: For car
+    //Alundaio: For car
     xr_delete(m_vehicle_anims);
-	//-Alundaio
+    //-Alundaio
 }
 
 void CActor::reinit()
@@ -1130,8 +1130,10 @@ void CActor::UpdateCL()
             pWeapon->UpdateSecondVP(); // --#SM+#-- +SecondVP+
 
             bool bUseMark = !!pWeapon->bMarkCanShow();
-            bool bInZoom = !!pWeapon->bInZoomRightNow();
+            bool bInZoom = !!(pWeapon->bInZoomRightNow() && pWeapon->bIsSecondVPZoomPresent() && psActorFlags.test(AF_3DSCOPE));
             bool bNVEnbl = !!pWeapon->bNVsecondVPstatus;
+
+            // float fVPRotFactor = pWeapon->bNVsecondVPstatus ? pWeapon->GetZRotatingFactor() : 0.0f;
 
             // Обновляем информацию об оружии в шейдерах
             g_pGamePersistent->m_pGShaderConstants->hud_params.x = bInZoom;  //--#SM+#--

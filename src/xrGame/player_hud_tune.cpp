@@ -740,9 +740,11 @@ void hud_draw_adjust_mode()
     }
 }
 
+extern bool isCustomWeapon;
+
 void hud_adjust_mode_keyb(int dik)
 {
-    if (pInput->iGetAsyncKeyState(SDL_SCANCODE_LALT))
+    if (pInput->iGetAsyncKeyState(SDL_SCANCODE_LALT) && isCustomWeapon)
     {
         if (dik == SDL_SCANCODE_KP_0)
             hud_adj_mode = 0;

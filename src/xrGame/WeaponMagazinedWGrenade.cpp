@@ -122,6 +122,8 @@ void CWeaponMagazinedWGrenade::switch2_Reload()
     VERIFY(GetState() == eReload);
     if (m_bGrenadeMode)
     {
+        iMagSizeCurrent = iMagazineSize;
+
         PlaySound("sndReloadG", get_LastFP2());
 
         PlayHUDMotion("anm_reload_g", "anim_reload_g", FALSE, this, GetState());
@@ -694,7 +696,19 @@ void CWeaponMagazinedWGrenade::PlayAnimShoot()
     {
         VERIFY(GetState() == eFire);
         if (IsGrenadeLauncherAttached())
-            PlayHUDMotion("anm_shots_w_gl", "anim_shoot_gl", FALSE, this, GetState());
+        {
+            if (IsZoomed())
+            {
+                if (isHUDAnimationExist("anm_shots_w_gl_when_aim"))
+                    PlayHUDMotion("anm_shots_w_gl_when_aim", FALSE, this, GetState());
+                else
+                    PlayHUDMotion("anm_shots_w_gl", "anim_shoot_gl", FALSE, this, GetState());
+            }
+            else
+            {
+                PlayHUDMotion("anm_shots_w_gl", "anim_shoot_gl", FALSE, this, GetState());
+            }
+        }
         else
             inherited::PlayAnimShoot();
     }
@@ -998,4 +1012,30 @@ int CWeaponMagazinedWGrenade::GetAmmoCount2(u8 ammo2_type) const
     R_ASSERT(ammo2_type < m_ammoTypes2.size());
 
     return GetAmmoCount_forType(m_ammoTypes2[ammo2_type]);
+}
+
+void CWeaponMagazinedWGrenade::switch2_Unmis()
+{
+	VERIFY(GetState() == eUnMisfire);
+	if (m_bGrenadeMode)
+	{
+		if (m_sounds_enabled)
+		{
+			if (m_sounds.FindSoundItem("sndReloadMisfire", false))
+				PlaySound("sndReloadMisfire", get_LastFP());
+			else if (m_sounds.FindSoundItem("sndReloadEmpty", false))
+				PlaySound("sndReloadEmpty", get_LastFP());
+			else
+				PlaySound("sndReload", get_LastFP());
+		}
+
+		if (isHUDAnimationExist("anm_reload_misfire_w_gl"))
+			PlayHUDMotion("anm_reload_misfire_w_gl", TRUE, this, GetState());
+		else if (isHUDAnimationExist("anm_reload_empty_w_gl"))
+			PlayHUDMotion("anm_reload_empty_w_gl", TRUE, this, GetState());
+		else
+			PlayHUDMotion("anm_reload_w_gl", TRUE, this, GetState());
+	}
+	else
+		inherited::switch2_Unmis();
 }

@@ -1770,7 +1770,7 @@ void CWeapon::OnZoomOut()
 
 CUIWindow* CWeapon::ZoomTexture()
 {
-    if (UseScopeTexture() && !psActorFlags.test(AF_3DSCOPE))
+    if (UseScopeTexture() && (!psActorFlags.test(AF_3DSCOPE) || !bIsSecondVPZoomPresent()))
         return m_UIScope;
     else
         return nullptr;

@@ -186,7 +186,13 @@ void CRender::OnFrame()
 }
 
 // Перед началом рендера мира --#SM+#--
-void CRender::BeforeWorldRender() {}
+void CRender::BeforeWorldRender()
+{
+    if (Device.m_SecondViewport.IsSVPFrame())
+    {
+        Device.m_SecondViewport.isR1 = true;
+    }
+}
 
 // После рендера мира и пост-эффектов --#SM+#--
 void CRender::AfterWorldRender()

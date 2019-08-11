@@ -346,6 +346,7 @@ void CCameraManager::ApplyDevice()
     // projection
     Device.fFOV = m_cam_info.fFov;
     Device.fASPECT = m_cam_info.fAspect;
+    float aspect = m_cam_info.fAspect;
     // Device.mProject.build_projection(deg2rad(m_cam_info.fFov), m_cam_info.fAspect, m_cam_info.fNear, m_cam_info.fFar);
 
     // --#SM+# Begin-- +SecondVP+
@@ -354,13 +355,14 @@ void CCameraManager::ApplyDevice()
     {
         // Для второго вьюпорта FOV выставляем здесь
         Device.fFOV = fFovSecond;
+
         // Предупреждаем что мы изменили настройки камеры
         Device.m_SecondViewport.isCamReady = true;
     }
     else
         Device.m_SecondViewport.isCamReady = false;
 
-    Device.mProject.build_projection(deg2rad(Device.fFOV), m_cam_info.fAspect, m_cam_info.fNear, m_cam_info.fFar);
+    Device.mProject.build_projection(deg2rad(Device.fFOV), aspect, m_cam_info.fNear, m_cam_info.fFar);
     // --#SM+# End--
 
     

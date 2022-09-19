@@ -77,6 +77,7 @@ extern float psSqueezeVelocity;
 extern int psLUA_GCSTEP;
 extern int g_auto_ammo_unload;
 
+extern u32 hud_adj_mode;
 extern int x_m_x;
 extern int x_m_z;
 extern BOOL net_cl_inputguaranteed;
@@ -107,6 +108,7 @@ int g_keypress_on_start = 1;
 ENGINE_API extern float g_console_sensitive;
 
 bool bCheatEnable = READ_IF_EXISTS(pSettingsOpenXRay, r_bool, "debug", "cheats_mode", false);
+bool isCustomWeapon = READ_IF_EXISTS(pSettingsOpenXRay, r_bool, "debug", "custom_weapon", false);
 
 //Alundaio
 extern BOOL g_ai_die_in_anomaly;
@@ -283,6 +285,40 @@ public:
     }
 };
 #endif // DEBUG
+
+class CCC_U32 : public IConsole_Command
+{
+protected:
+    unsigned* value;
+    unsigned min, max;
+
+public:
+    const unsigned GetValue() const { return *value; };
+    void GetBounds(u32& imin, u32& imax) const
+    {
+        imin = min;
+        imax = max;
+    }
+    CCC_U32(const char* N, unsigned* V, unsigned _min = 0, unsigned _max = 999)
+        : IConsole_Command(N), value(V), min(_min), max(_max) {};
+    virtual void Execute(const char* args)
+    {
+        int v = atoi(args);
+        if (v < min || v > max)
+            InvalidSyntax();
+        else
+            *value = v;
+    }
+    virtual void Status(TStatus& S) { itoa(*value, S, 10); }
+    virtual void Info(TInfo& I) { xr_sprintf(I, sizeof(I), "integer value in range [%d,%d]", min, max); }
+    virtual void fill_tips(vecTips& tips, u32 mode)
+    {
+        TStatus str;
+        xr_sprintf(str, sizeof(str), "%d  (current)  [%d,%d]", *value, min, max);
+        tips.push_back(str);
+        IConsole_Command::fill_tips(tips, mode);
+    }
+};
 
 class CCC_ALifeTimeFactor : public IConsole_Command
 {
@@ -2098,13 +2134,18 @@ void CCC_RegisterCommands()
     CMD4(CCC_FloatBlock, "ph_tri_query_ex_aabb_rate", &ph_console::ph_tri_query_ex_aabb_rate, 1.01f, 3.f);
 #endif // DEBUG
 
-	if (bCheatEnable)
-	{
+    if (bCheatEnable)
+    {
         CMD3(CCC_Mask, "g_god", &psActorFlags, AF_GODMODE);
         CMD3(CCC_Mask, "g_unlimitedammo", &psActorFlags, AF_UNLIMITEDAMMO);
         CMD1(CCC_SetWeather, "set_weather");
+    }
+    if (isCustomWeapon)
+    {
         CMD1(CCC_TuneAttachableItem, "dbg_adjust_attachable_item");
-	}
+        CMD4(CCC_U32, "hud_adjust_mode", &hud_adj_mode, 0, 5); /// adjust mode support
+
+    }
 
 #ifndef MASTER_GOLD
     CMD1(CCC_JumpToLevel, "jump_to_level");

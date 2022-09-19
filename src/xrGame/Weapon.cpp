@@ -2122,14 +2122,12 @@ BOOL CWeapon::ParentIsActor()
     return EA->cast_actor() != nullptr;
 }
 
-extern u32 hud_adj_mode;
-
 bool CWeapon::ZoomHideCrosshair()
 {
-	if (hud_adj_mode != 0)
-		return false;
-
-	return m_zoom_params.m_bHideCrosshairInZoom || ZoomTexture();
+    CActor* pA = smart_cast<CActor*>(H_Parent());
+    if (pA && pA->active_cam() == eacLookAt || hud_adj_mode != 0)
+        return false;
+    return m_zoom_params.m_bHideCrosshairInZoom || ZoomTexture();
 }
 
 void CWeapon::debug_draw_firedeps()

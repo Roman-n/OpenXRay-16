@@ -38,12 +38,22 @@ bool g_bAutoClearCrouch = true;
 
 void CActor::IR_OnKeyboardPress(int cmd)
 {
-    if (hud_adj_mode && pInput->iGetAsyncKeyState(SDL_SCANCODE_LSHIFT))
+    if (hud_adj_mode)
 	{
-		if (pInput->iGetAsyncKeyState(SDL_SCANCODE_RETURN) || pInput->iGetAsyncKeyState(SDL_SCANCODE_BACKSPACE) ||
-			pInput->iGetAsyncKeyState(SDL_SCANCODE_DELETE))
-			g_player_hud->tune(Ivector().set(0, 0, 0));
-		return;
+        if (pInput->iGetAsyncKeyState(SDL_SCANCODE_LSHIFT))
+        {
+		    if (pInput->iGetAsyncKeyState(SDL_SCANCODE_RETURN) ||
+                pInput->iGetAsyncKeyState(SDL_SCANCODE_BACKSPACE) ||
+			    pInput->iGetAsyncKeyState(SDL_SCANCODE_DELETE))
+			    g_player_hud->tune(Ivector().set(0, 0, 0));
+		    return;
+        }
+        else if (pInput->iGetAsyncKeyState(SDL_SCANCODE_END))
+        {
+            extern void logInfoAboutTunedItems(); //defined in player_hud_tune.cpp
+            logInfoAboutTunedItems();
+            return;
+        }
 	}
 
     if (Remote())
